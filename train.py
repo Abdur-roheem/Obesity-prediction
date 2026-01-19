@@ -5,6 +5,8 @@
 import pandas as pd
 import joblib
 
+
+from sklearn.multiclass import OneVsRestClassifier
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -88,19 +90,20 @@ X_train, X_test, y_train, y_test = train_test_split(
 # =============================
 pipeline = Pipeline([
     ('scaler', StandardScaler()),
-    ('logreg', LogisticRegression(
-        solver='liblinear',  # compatible with older sklearn
-        max_iter=1000,
-        random_state=4
+    ('logreg', OneVsRestClassifier(
+        LogisticRegression(
+            solver='liblinear',
+            max_iter=1000,
+            random_state=4
+        )
     ))
 ])
-
 # =============================
 # 6. Hyperparameter grid
 # =============================
 param_grid = {
-    'logreg__C': [0.01, 0.1, 1, 10],
-    'logreg__penalty': ['l1', 'l2']
+    'logreg__estimator__C': [0.01, 0.1, 1, 10],
+    'logreg__estimator__penalty': ['l1', 'l2']
 }
 
 # =============================
