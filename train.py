@@ -1,17 +1,7 @@
-import pandas as pd
-import joblib
-
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, LabelEncoder
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_auc_score
-
-
-
 # =============================
-# Imports
+# train_logreg_obesity.py
 # =============================
+
 import pandas as pd
 import joblib
 
@@ -25,7 +15,6 @@ from sklearn.metrics import roc_auc_score
 # 1. Read data
 # =============================
 DATA_PATH = "/workspaces/Obesity-prediction/ObesityDataSet_raw_and_data_sinthetic.csv"
-
 df2 = pd.read_csv(DATA_PATH)
 
 # =============================
@@ -81,7 +70,7 @@ df2 = df2.astype('float64')
 # 3. Split features and target
 # =============================
 X = df2.drop(columns=["NObeyesdad"])
-y = df2["NObeyesdad"].values   # 1D array required by sklearn
+y = df2["NObeyesdad"].values  # 1D array required by sklearn
 
 # =============================
 # 4. Train–test split
@@ -91,7 +80,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     y,
     test_size=0.2,
     stratify=y,
-    random_state=42
+    random_state=4
 )
 
 # =============================
@@ -100,10 +89,9 @@ X_train, X_test, y_train, y_test = train_test_split(
 pipeline = Pipeline([
     ('scaler', StandardScaler()),
     ('logreg', LogisticRegression(
-        solver='saga',
-        multi_class='multinomial',
+        solver='liblinear',  # compatible with older sklearn
         max_iter=1000,
-        random_state=42
+        random_state=4
     ))
 ])
 
@@ -133,7 +121,6 @@ grid.fit(X_train, y_train)
 # 8. Evaluation
 # =============================
 best_model = grid.best_estimator_
-
 y_proba = best_model.predict_proba(X_test)
 
 test_roc_auc = roc_auc_score(
@@ -149,9 +136,6 @@ print("Test ROC-AUC:", test_roc_auc)
 # =============================
 # 9. Save trained model
 # =============================
-
 file_name = "logreg_obesity_multiclass.joblib"
 joblib.dump(best_model, file_name)
-
 print(f"Model saved successfully: {file_name}")
-
